@@ -94,3 +94,11 @@ Content-Type: application/json
 {
   "reason": ""
 }
+
+### Оферта (само за PROCESSING заявка -> OFFERED; цената се изчислява)
+POST http://localhost:8080/api/requests/1/offer
+Content-Type: application/json
+
+{
+  "description": "Replace the heating element and test the boiler"
+}

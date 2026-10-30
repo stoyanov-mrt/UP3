@@ -1,8 +1,11 @@
 package com.example.service;
 
 import com.example.dto.CreateServiceRequestDto;
+import com.example.dto.OfferResponseDto;
 import com.example.dto.ServiceRequestResponseDto;
 import com.example.entity.CustomerInfo;
+import com.example.entity.Offer;
+import com.example.entity.PriceBreakdown;
 import com.example.entity.ServiceRequest;
 import com.example.repository.ServiceRequestRepository;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +60,16 @@ public class ServiceRequestService {
         return toResponse(request);
     }
 
+    @Transactional
+    public OfferResponseDto createOffer(Long id, String description) {
+        ServiceRequest request = getRequest(id);
+        Offer offer = request.createOffer(description);
+        // The request is already managed: flush cascades PERSIST to this same offer instance, so its
+        // generated id is available for the response. save() would merge and persist a copy instead.
+        repository.flush();
+        return toResponse(request, offer);
+    }
+
     private ServiceRequest getRequest(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ServiceRequestNotFoundException(id));
@@ -76,6 +89,23 @@ public class ServiceRequestService {
                 request.getStatus(),
                 request.getSubmittedAt(),
                 request.getRejectionReason()
+        );
+    }
+
+    private OfferResponseDto toResponse(ServiceRequest request, Offer offer) {
+        PriceBreakdown price = offer.getPriceBreakdown();
+        return new OfferResponseDto(
+                offer.getId(),
+                request.getId(),
+                request.getStatus(),
+                offer.getDescription(),
+                offer.getCreatedAt(),
+                offer.getValidUntil(),
+                offer.getFinalPrice(),
+                new OfferResponseDto.PriceBreakdownDto(
+                        price.basePrice(),
+                        price.executionModeAdditionalPrice(),
+                        price.prioritySurcharge())
         );
     }
 }

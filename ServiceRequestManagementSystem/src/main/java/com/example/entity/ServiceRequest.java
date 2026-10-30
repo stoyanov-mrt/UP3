@@ -1,13 +1,17 @@
 package com.example.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -61,6 +65,10 @@ public class ServiceRequest {
 
     private String rejectionReason;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "offer_id", unique = true)
+    private Offer offer;
+
     /**
      * Creates a newly submitted request. status and submittedAt are system-managed.
      */
@@ -94,5 +102,22 @@ public class ServiceRequest {
         }
         status = RequestStatus.REJECTED;
         rejectionReason = reason;
+    }
+
+    /**
+     * Creates the offer with a price calculated from the request's characteristics.
+     * The status becomes OFFERED only after the offer has been created successfully.
+     */
+    public Offer createOffer(String description) {
+        if (offer != null) {
+            throw new OfferAlreadyExistsException();
+        }
+        if (status != RequestStatus.PROCESSING) {
+            throw new InvalidStatusTransitionException("create an offer for", status);
+        }
+        offer = new Offer(description, PriceBreakdown.of(serviceType, executionMode, priority),
+                LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+        status = RequestStatus.OFFERED;
+        return offer;
     }
 }

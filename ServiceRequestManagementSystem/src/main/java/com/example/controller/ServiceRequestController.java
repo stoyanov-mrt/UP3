@@ -1,6 +1,8 @@
 package com.example.controller;
 
+import com.example.dto.CreateOfferDto;
 import com.example.dto.CreateServiceRequestDto;
+import com.example.dto.OfferResponseDto;
 import com.example.dto.RejectServiceRequestDto;
 import com.example.dto.ServiceRequestResponseDto;
 import com.example.service.ServiceRequestService;
@@ -48,5 +50,11 @@ public class ServiceRequestController {
     @PostMapping("/{id}/reject")
     public ServiceRequestResponseDto reject(@PathVariable Long id, @Valid @RequestBody RejectServiceRequestDto dto) {
         return service.reject(id, dto.reason());
+    }
+
+    @PostMapping("/{id}/offer")
+    @ResponseStatus(HttpStatus.CREATED)
+    public OfferResponseDto createOffer(@PathVariable Long id, @Valid @RequestBody CreateOfferDto dto) {
+        return service.createOffer(id, dto.description());
     }
 }
