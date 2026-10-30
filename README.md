@@ -28,3 +28,17 @@ cd ServiceRequestManagementSystem
 * [Лаб 2](docs/lab2.md) — домейн анализ, value object `CustomerInfo`
 * [Лаб 3](docs/lab3.md) — валидация (вкл. условни правила) и обработка на грешки
 * [Лаб 4](docs/lab4.md) — жизнен цикъл: започване на обработка, отхвърляне, HTTP 409
+* [Лаб 5](docs/lab5.md) — оферта към заявката с изчисляване на цена
+
+## API (след лаб 5)
+
+| Метод | Път | Описание |
+|---|---|---|
+| POST | `/api/requests` | подаване на заявка (→ `SUBMITTED`) |
+| GET | `/api/requests` | всички заявки |
+| GET | `/api/requests/{id}` | заявка по id |
+| POST | `/api/requests/{id}/start-processing` | `SUBMITTED` → `PROCESSING` |
+| POST | `/api/requests/{id}/reject` | `PROCESSING` → `REJECTED`, тяло `{"reason": "..."}` |
+| POST | `/api/requests/{id}/offer` | `PROCESSING` → `OFFERED`, тяло `{"description": "..."}`; цената се изчислява |
+
+Грешки (ProblemDetail): 400 невалиден вход, 404 липсваща заявка, 409 недопустима операция за статуса, 500 неочаквана грешка.
