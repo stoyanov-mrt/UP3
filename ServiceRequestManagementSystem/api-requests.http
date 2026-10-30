@@ -23,3 +23,55 @@ GET http://localhost:8080/api/requests/1
 
 ### Несъществуваща заявка -> 404
 GET http://localhost:8080/api/requests/999
+
+### Невалиден email -> 400
+POST http://localhost:8080/api/requests
+Content-Type: application/json
+
+{
+  "customerName": "Ivan Petrov",
+  "customerEmail": "not-an-email",
+  "description": "Broken boiler",
+  "serviceType": "REPAIR",
+  "executionMode": "REMOTE",
+  "priority": "STANDARD"
+}
+
+### ON_SITE без адрес -> 400
+POST http://localhost:8080/api/requests
+Content-Type: application/json
+
+{
+  "customerName": "Ivan Petrov",
+  "customerEmail": "ivan@example.com",
+  "description": "Broken boiler",
+  "serviceType": "REPAIR",
+  "executionMode": "ON_SITE",
+  "priority": "STANDARD"
+}
+
+### URGENT без причина -> 400
+POST http://localhost:8080/api/requests
+Content-Type: application/json
+
+{
+  "customerName": "Ivan Petrov",
+  "customerEmail": "ivan@example.com",
+  "description": "Broken boiler",
+  "serviceType": "REPAIR",
+  "executionMode": "REMOTE",
+  "priority": "URGENT"
+}
+
+### Невалидна enum стойност -> 400
+POST http://localhost:8080/api/requests
+Content-Type: application/json
+
+{
+  "customerName": "Ivan Petrov",
+  "customerEmail": "ivan@example.com",
+  "description": "Broken boiler",
+  "serviceType": "PAINTING",
+  "executionMode": "REMOTE",
+  "priority": "STANDARD"
+}

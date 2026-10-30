@@ -7,10 +7,8 @@ import com.example.entity.RequestStatus;
 import com.example.entity.ServiceRequest;
 import com.example.repository.ServiceRequestRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -50,8 +48,7 @@ public class ServiceRequestService {
     public ServiceRequestResponseDto findById(Long id) {
         return repository.findById(id)
                 .map(this::toResponse)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Service request " + id + " not found"));
+                .orElseThrow(() -> new ServiceRequestNotFoundException(id));
     }
 
     private ServiceRequestResponseDto toResponse(ServiceRequest request) {
