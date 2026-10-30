@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.dto.CreateServiceRequestDto;
 import com.example.dto.ServiceRequestResponseDto;
+import com.example.entity.CustomerInfo;
 import com.example.entity.RequestStatus;
 import com.example.entity.ServiceRequest;
 import com.example.repository.ServiceRequestRepository;
@@ -24,11 +25,13 @@ public class ServiceRequestService {
     @Transactional
     public ServiceRequestResponseDto create(CreateServiceRequestDto dto) {
         ServiceRequest request = new ServiceRequest();
-        request.setCustomerEmail(dto.customerEmail());
+        request.setCustomerInfo(new CustomerInfo(dto.customerName(), dto.customerEmail()));
         request.setDescription(dto.description());
         request.setServiceType(dto.serviceType());
         request.setExecutionMode(dto.executionMode());
         request.setPriority(dto.priority());
+        request.setAddress(dto.address());
+        request.setUrgencyReason(dto.urgencyReason());
         // System-managed values
         request.setStatus(RequestStatus.SUBMITTED);
         // Truncated to the precision stored by the database, so POST and GET return the same value
@@ -54,11 +57,14 @@ public class ServiceRequestService {
     private ServiceRequestResponseDto toResponse(ServiceRequest request) {
         return new ServiceRequestResponseDto(
                 request.getId(),
-                request.getCustomerEmail(),
+                request.getCustomerInfo().customerName(),
+                request.getCustomerInfo().customerEmail(),
                 request.getDescription(),
                 request.getServiceType(),
                 request.getExecutionMode(),
                 request.getPriority(),
+                request.getAddress(),
+                request.getUrgencyReason(),
                 request.getStatus(),
                 request.getSubmittedAt()
         );

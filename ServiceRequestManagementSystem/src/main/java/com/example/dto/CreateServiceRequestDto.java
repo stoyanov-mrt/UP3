@@ -12,10 +12,13 @@ import jakarta.validation.constraints.NotNull;
  * they are managed by the system.
  */
 public record CreateServiceRequestDto(
+        @NotBlank String customerName,
         @NotBlank @Email String customerEmail,
         @NotBlank String description,
         @NotNull ServiceType serviceType,
         @NotNull ExecutionMode executionMode,
-        @NotNull Priority priority
+        @NotNull Priority priority,
+        String address,
+        String urgencyReason
 ) {
 }

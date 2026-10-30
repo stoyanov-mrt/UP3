@@ -1,6 +1,7 @@
 package com.example.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -25,11 +26,15 @@ public class ServiceRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String customerEmail;
+    @Embedded
+    private CustomerInfo customerInfo;
 
     @Column(nullable = false, length = 2000)
     private String description;
+
+    private String address;
+
+    private String urgencyReason;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

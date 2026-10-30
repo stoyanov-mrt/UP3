@@ -5,11 +5,14 @@ POST http://localhost:8080/api/requests
 Content-Type: application/json
 
 {
+  "customerName": "Ivan Petrov",
   "customerEmail": "ivan@example.com",
   "description": "Broken boiler",
   "serviceType": "REPAIR",
   "executionMode": "ON_SITE",
-  "priority": "URGENT"
+  "priority": "URGENT",
+  "address": "Varna, 1 Main St",
+  "urgencyReason": "No heating"
 }
 
 ### Всички заявки

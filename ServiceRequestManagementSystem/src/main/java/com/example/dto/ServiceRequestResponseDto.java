@@ -9,11 +9,14 @@ import java.time.LocalDateTime;
 
 public record ServiceRequestResponseDto(
         Long id,
+        String customerName,
         String customerEmail,
         String description,
         ServiceType serviceType,
         ExecutionMode executionMode,
         Priority priority,
+        String address,
+        String urgencyReason,
         RequestStatus status,
         LocalDateTime submittedAt
 ) {
