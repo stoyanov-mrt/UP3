@@ -150,6 +150,25 @@ public class ServiceRequest {
         status = RequestStatus.SCHEDULED;
     }
 
+    public void startExecution(LocalDateTime now) {
+        if (status != RequestStatus.SCHEDULED) {
+            throw new InvalidStatusTransitionException("start the execution of", status);
+        }
+        execution.start(now);
+        status = RequestStatus.IN_PROGRESS;
+    }
+
+    public void completeExecution(String result, LocalDateTime now) {
+        if (result == null || result.isBlank()) {
+            throw new IllegalArgumentException("Execution result is required");
+        }
+        if (status != RequestStatus.IN_PROGRESS) {
+            throw new InvalidStatusTransitionException("complete the execution of", status);
+        }
+        execution.complete(result, now);
+        status = RequestStatus.COMPLETED;
+    }
+
     // REMOTE: at least 4 hours after scheduling; ON_SITE: at the earliest on the next working day
     private LocalDateTime earliestStart(LocalDateTime now) {
         return switch (executionMode) {

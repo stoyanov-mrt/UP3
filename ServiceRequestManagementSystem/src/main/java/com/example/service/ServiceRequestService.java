@@ -100,6 +100,20 @@ public class ServiceRequestService {
         return toResponse(request);
     }
 
+    @Transactional
+    public ServiceRequestResponseDto startExecution(Long id) {
+        ServiceRequest request = getRequest(id);
+        request.startExecution(now());
+        return toResponse(request);
+    }
+
+    @Transactional
+    public ServiceRequestResponseDto completeExecution(Long id, String result) {
+        ServiceRequest request = getRequest(id);
+        request.completeExecution(result, now());
+        return toResponse(request);
+    }
+
     // Truncated to the precision stored by the database, so POST and GET return the same value
     private LocalDateTime now() {
         return LocalDateTime.now(clock).truncatedTo(ChronoUnit.MICROS);
@@ -134,7 +148,10 @@ public class ServiceRequestService {
         }
         return new ServiceRequestResponseDto.ExecutionDto(
                 execution.getExpectedStart(),
-                execution.getExpectedEnd()
+                execution.getExpectedEnd(),
+                execution.getActualStart(),
+                execution.getActualEnd(),
+                execution.getResult()
         );
     }
 

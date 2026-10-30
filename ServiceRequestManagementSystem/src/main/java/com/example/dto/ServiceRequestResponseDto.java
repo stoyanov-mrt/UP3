@@ -28,7 +28,10 @@ public record ServiceRequestResponseDto(
      */
     public record ExecutionDto(
             LocalDateTime expectedStart,
-            LocalDateTime expectedEnd
+            LocalDateTime expectedEnd,
+            LocalDateTime actualStart,
+            LocalDateTime actualEnd,
+            String result
     ) {
     }
 }

@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.dto.CompleteExecutionDto;
 import com.example.dto.CreateOfferDto;
 import com.example.dto.CreateServiceRequestDto;
 import com.example.dto.OfferResponseDto;
@@ -72,5 +73,16 @@ public class ServiceRequestController {
     @PostMapping("/{id}/schedule")
     public ServiceRequestResponseDto schedule(@PathVariable Long id, @Valid @RequestBody ScheduleServiceRequestDto dto) {
         return service.schedule(id, dto.expectedStart(), dto.expectedEnd());
+    }
+
+    @PostMapping("/{id}/execution/start")
+    public ServiceRequestResponseDto startExecution(@PathVariable Long id) {
+        return service.startExecution(id);
+    }
+
+    @PostMapping("/{id}/execution/complete")
+    public ServiceRequestResponseDto completeExecution(@PathVariable Long id,
+                                                       @Valid @RequestBody CompleteExecutionDto dto) {
+        return service.completeExecution(id, dto.result());
     }
 }

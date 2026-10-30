@@ -32,8 +32,24 @@ public class ServiceExecution {
     @Column(nullable = false)
     private LocalDateTime expectedEnd;
 
+    private LocalDateTime actualStart;
+
+    private LocalDateTime actualEnd;
+
+    @Column(length = 2000)
+    private String result;
+
     ServiceExecution(LocalDateTime expectedStart, LocalDateTime expectedEnd) {
         this.expectedStart = expectedStart;
         this.expectedEnd = expectedEnd;
+    }
+
+    void start(LocalDateTime now) {
+        actualStart = now;
+    }
+
+    void complete(String result, LocalDateTime now) {
+        this.result = result;
+        actualEnd = now;
     }
 }
