@@ -29,16 +29,25 @@ cd ServiceRequestManagementSystem
 * [Лаб 3](docs/lab3.md) — валидация (вкл. условни правила) и обработка на грешки
 * [Лаб 4](docs/lab4.md) — жизнен цикъл: започване на обработка, отхвърляне, HTTP 409
 * [Лаб 5](docs/lab5.md) — оферта към заявката с изчисляване на цена
+* [Лаб 6](docs/lab6.md) — приемане/отказ/изтичане, планиране, изпълнение, отмяна, loyalty отстъпка; review и gap analysis
 
-## API (след лаб 5)
+## API (след лаб 6)
 
 | Метод | Път | Описание |
 |---|---|---|
 | POST | `/api/requests` | подаване на заявка (→ `SUBMITTED`) |
 | GET | `/api/requests` | всички заявки |
-| GET | `/api/requests/{id}` | заявка по id |
+| GET | `/api/requests/{id}` | заявка по id (с `execution`, ако е планирана) |
 | POST | `/api/requests/{id}/start-processing` | `SUBMITTED` → `PROCESSING` |
 | POST | `/api/requests/{id}/reject` | `PROCESSING` → `REJECTED`, тяло `{"reason": "..."}` |
 | POST | `/api/requests/{id}/offer` | `PROCESSING` → `OFFERED`, тяло `{"description": "..."}`; цената се изчислява |
+| POST | `/api/requests/{id}/offer/accept` | `OFFERED` → `ACCEPTED` (след `validUntil` → 409 и `EXPIRED`) |
+| POST | `/api/requests/{id}/offer/decline` | `OFFERED` → `REJECTED` (след `validUntil` → 409 и `EXPIRED`) |
+| POST | `/api/requests/{id}/schedule` | `ACCEPTED` → `SCHEDULED`, тяло `{"expectedStart": "...", "expectedEnd": "..."}` |
+| POST | `/api/requests/{id}/execution/start` | `SCHEDULED` → `IN_PROGRESS` |
+| POST | `/api/requests/{id}/execution/complete` | `IN_PROGRESS` → `COMPLETED`, тяло `{"result": "..."}` |
+| POST | `/api/requests/{id}/cancel` | → `CANCELLED` преди изпълнение, тяло `{"reason": "..."}` |
 
-Грешки (ProblemDetail): 400 невалиден вход, 404 липсваща заявка, 409 недопустима операция за статуса, 500 неочаквана грешка.
+Грешки (ProblemDetail): 400 невалиден вход или неспазено правило за графика, 404 липсваща заявка, 409 недопустима операция за статуса/момента, 500 неочаквана грешка.
+
+Настройки за ръчна проверка: `app.clock.offset` (напр. `P4D`) измества часовника; `app.offer-expiration.interval` (по подразбиране `PT1M`) е интервалът за изтичане на оферти.
