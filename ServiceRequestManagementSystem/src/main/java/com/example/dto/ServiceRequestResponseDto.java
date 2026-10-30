@@ -18,6 +18,7 @@ public record ServiceRequestResponseDto(
         String address,
         String urgencyReason,
         RequestStatus status,
-        LocalDateTime submittedAt
+        LocalDateTime submittedAt,
+        String rejectionReason
 ) {
 }

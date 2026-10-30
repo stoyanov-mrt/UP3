@@ -1,5 +1,7 @@
 package com.example.entity;
 
 public enum RequestStatus {
-    SUBMITTED
+    SUBMITTED,
+    PROCESSING,
+    REJECTED
 }

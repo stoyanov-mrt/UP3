@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.entity.InvalidStatusTransitionException;
 import com.example.service.ServiceRequestNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +29,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ServiceRequestNotFoundException.class)
     public ProblemDetail handleNotFound(ServiceRequestNotFoundException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidStatusTransitionException.class)
+    public ProblemDetail handleInvalidTransition(InvalidStatusTransitionException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     @Override

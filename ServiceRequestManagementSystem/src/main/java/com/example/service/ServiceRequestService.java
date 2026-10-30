@@ -46,8 +46,26 @@ public class ServiceRequestService {
 
     @Transactional(readOnly = true)
     public ServiceRequestResponseDto findById(Long id) {
+        return toResponse(getRequest(id));
+    }
+
+    // The status change is flushed by JPA dirty checking when the transaction commits
+    @Transactional
+    public ServiceRequestResponseDto startProcessing(Long id) {
+        ServiceRequest request = getRequest(id);
+        request.startProcessing();
+        return toResponse(request);
+    }
+
+    @Transactional
+    public ServiceRequestResponseDto reject(Long id, String reason) {
+        ServiceRequest request = getRequest(id);
+        request.reject(reason);
+        return toResponse(request);
+    }
+
+    private ServiceRequest getRequest(Long id) {
         return repository.findById(id)
-                .map(this::toResponse)
                 .orElseThrow(() -> new ServiceRequestNotFoundException(id));
     }
 
@@ -63,7 +81,8 @@ public class ServiceRequestService {
                 request.getAddress(),
                 request.getUrgencyReason(),
                 request.getStatus(),
-                request.getSubmittedAt()
+                request.getSubmittedAt(),
+                request.getRejectionReason()
         );
     }
 }

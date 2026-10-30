@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.dto.CreateServiceRequestDto;
+import com.example.dto.RejectServiceRequestDto;
 import com.example.dto.ServiceRequestResponseDto;
 import com.example.service.ServiceRequestService;
 import jakarta.validation.Valid;
@@ -37,5 +38,15 @@ public class ServiceRequestController {
     @GetMapping("/{id}")
     public ServiceRequestResponseDto findById(@PathVariable Long id) {
         return service.findById(id);
+    }
+
+    @PostMapping("/{id}/start-processing")
+    public ServiceRequestResponseDto startProcessing(@PathVariable Long id) {
+        return service.startProcessing(id);
+    }
+
+    @PostMapping("/{id}/reject")
+    public ServiceRequestResponseDto reject(@PathVariable Long id, @Valid @RequestBody RejectServiceRequestDto dto) {
+        return service.reject(id, dto.reason());
     }
 }

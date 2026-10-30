@@ -54,4 +54,24 @@ public class ServiceRequest {
 
     @Column(nullable = false)
     private LocalDateTime submittedAt;
+
+    private String rejectionReason;
+
+    public void startProcessing() {
+        if (status != RequestStatus.SUBMITTED) {
+            throw new InvalidStatusTransitionException("start processing", status);
+        }
+        status = RequestStatus.PROCESSING;
+    }
+
+    public void reject(String reason) {
+        if (reason == null || reason.isBlank()) {
+            throw new IllegalArgumentException("Rejection reason is required");
+        }
+        if (status != RequestStatus.PROCESSING) {
+            throw new InvalidStatusTransitionException("reject", status);
+        }
+        status = RequestStatus.REJECTED;
+        rejectionReason = reason;
+    }
 }
