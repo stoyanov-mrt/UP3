@@ -5,6 +5,7 @@ import com.example.dto.OfferResponseDto;
 import com.example.dto.ServiceRequestResponseDto;
 import com.example.entity.CustomerInfo;
 import com.example.entity.Offer;
+import com.example.entity.OfferExpiredException;
 import com.example.entity.PriceBreakdown;
 import com.example.entity.ServiceRequest;
 import com.example.repository.ServiceRequestRepository;
@@ -12,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -19,6 +23,7 @@ import java.util.List;
 public class ServiceRequestService {
 
     private final ServiceRequestRepository repository;
+    private final Clock clock;
 
     @Transactional
     public ServiceRequestResponseDto create(CreateServiceRequestDto dto) {
@@ -29,7 +34,8 @@ public class ServiceRequestService {
                 dto.executionMode(),
                 dto.priority(),
                 dto.address(),
-                dto.urgencyReason());
+                dto.urgencyReason(),
+                now());
         return toResponse(repository.save(request));
     }
 
@@ -63,11 +69,32 @@ public class ServiceRequestService {
     @Transactional
     public OfferResponseDto createOffer(Long id, String description) {
         ServiceRequest request = getRequest(id);
-        Offer offer = request.createOffer(description);
+        Offer offer = request.createOffer(description, now());
         // The request is already managed: flush cascades PERSIST to this same offer instance, so its
         // generated id is available for the response. save() would merge and persist a copy instead.
         repository.flush();
         return toResponse(request, offer);
+    }
+
+    // noRollbackFor: an expired offer moves the request to EXPIRED, which must be saved even though
+    // the accept/decline operation itself fails with 409
+    @Transactional(noRollbackFor = OfferExpiredException.class)
+    public ServiceRequestResponseDto acceptOffer(Long id) {
+        ServiceRequest request = getRequest(id);
+        request.acceptOffer(now());
+        return toResponse(request);
+    }
+
+    @Transactional(noRollbackFor = OfferExpiredException.class)
+    public ServiceRequestResponseDto declineOffer(Long id) {
+        ServiceRequest request = getRequest(id);
+        request.declineOffer(now());
+        return toResponse(request);
+    }
+
+    // Truncated to the precision stored by the database, so POST and GET return the same value
+    private LocalDateTime now() {
+        return LocalDateTime.now(clock).truncatedTo(ChronoUnit.MICROS);
     }
 
     private ServiceRequest getRequest(Long id) {

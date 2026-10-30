@@ -54,4 +54,9 @@ public class Offer {
     public BigDecimal getFinalPrice() {
         return priceBreakdown.total();
     }
+
+    // The offer is still valid at exactly validUntil
+    public boolean isExpiredAt(LocalDateTime moment) {
+        return moment.isAfter(validUntil);
+    }
 }

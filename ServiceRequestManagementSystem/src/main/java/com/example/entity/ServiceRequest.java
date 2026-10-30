@@ -18,7 +18,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 
 /**
  * State is changed only through the constructor and the lifecycle operations - there are no setters,
@@ -70,10 +69,12 @@ public class ServiceRequest {
     private Offer offer;
 
     /**
-     * Creates a newly submitted request. status and submittedAt are system-managed.
+     * Creates a newly submitted request. status and submittedAt are system-managed;
+     * submittedAt is the current time supplied by the service.
      */
     public ServiceRequest(CustomerInfo customerInfo, String description, ServiceType serviceType,
-                          ExecutionMode executionMode, Priority priority, String address, String urgencyReason) {
+                          ExecutionMode executionMode, Priority priority, String address, String urgencyReason,
+                          LocalDateTime submittedAt) {
         this.customerInfo = customerInfo;
         this.description = description;
         this.serviceType = serviceType;
@@ -82,8 +83,7 @@ public class ServiceRequest {
         this.address = address;
         this.urgencyReason = urgencyReason;
         this.status = RequestStatus.SUBMITTED;
-        // Truncated to the precision stored by the database, so POST and GET return the same value
-        this.submittedAt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
+        this.submittedAt = submittedAt;
     }
 
     public void startProcessing() {
@@ -108,16 +108,38 @@ public class ServiceRequest {
      * Creates the offer with a price calculated from the request's characteristics.
      * The status becomes OFFERED only after the offer has been created successfully.
      */
-    public Offer createOffer(String description) {
+    public Offer createOffer(String description, LocalDateTime now) {
         if (offer != null) {
             throw new OfferAlreadyExistsException();
         }
         if (status != RequestStatus.PROCESSING) {
             throw new InvalidStatusTransitionException("create an offer for", status);
         }
-        offer = new Offer(description, PriceBreakdown.of(serviceType, executionMode, priority),
-                LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+        offer = new Offer(description, PriceBreakdown.of(serviceType, executionMode, priority), now);
         status = RequestStatus.OFFERED;
         return offer;
+    }
+
+    public void acceptOffer(LocalDateTime now) {
+        requireValidOffer("accept the offer of", now);
+        status = RequestStatus.ACCEPTED;
+    }
+
+    public void declineOffer(LocalDateTime now) {
+        requireValidOffer("decline the offer of", now);
+        status = RequestStatus.REJECTED;
+    }
+
+    /**
+     * An expired offer can be neither accepted nor declined - the request becomes EXPIRED instead.
+     */
+    private void requireValidOffer(String operation, LocalDateTime now) {
+        if (status != RequestStatus.OFFERED) {
+            throw new InvalidStatusTransitionException(operation, status);
+        }
+        if (offer.isExpiredAt(now)) {
+            status = RequestStatus.EXPIRED;
+            throw new OfferExpiredException(offer.getValidUntil());
+        }
     }
 }

@@ -57,4 +57,14 @@ public class ServiceRequestController {
     public OfferResponseDto createOffer(@PathVariable Long id, @Valid @RequestBody CreateOfferDto dto) {
         return service.createOffer(id, dto.description());
     }
+
+    @PostMapping("/{id}/offer/accept")
+    public ServiceRequestResponseDto acceptOffer(@PathVariable Long id) {
+        return service.acceptOffer(id);
+    }
+
+    @PostMapping("/{id}/offer/decline")
+    public ServiceRequestResponseDto declineOffer(@PathVariable Long id) {
+        return service.declineOffer(id);
+    }
 }

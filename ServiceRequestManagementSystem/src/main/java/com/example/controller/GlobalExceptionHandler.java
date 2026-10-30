@@ -2,6 +2,7 @@ package com.example.controller;
 
 import com.example.entity.InvalidStatusTransitionException;
 import com.example.entity.OfferAlreadyExistsException;
+import com.example.entity.OfferExpiredException;
 import com.example.service.ServiceRequestNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -32,7 +33,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    @ExceptionHandler({InvalidStatusTransitionException.class, OfferAlreadyExistsException.class})
+    @ExceptionHandler({InvalidStatusTransitionException.class, OfferAlreadyExistsException.class,
+            OfferExpiredException.class})
     public ProblemDetail handleConflict(RuntimeException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
