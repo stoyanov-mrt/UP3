@@ -114,6 +114,13 @@ public class ServiceRequestService {
         return toResponse(request);
     }
 
+    @Transactional
+    public ServiceRequestResponseDto cancel(Long id, String reason) {
+        ServiceRequest request = getRequest(id);
+        request.cancel(reason, now());
+        return toResponse(request);
+    }
+
     // Truncated to the precision stored by the database, so POST and GET return the same value
     private LocalDateTime now() {
         return LocalDateTime.now(clock).truncatedTo(ChronoUnit.MICROS);
@@ -138,6 +145,7 @@ public class ServiceRequestService {
                 request.getStatus(),
                 request.getSubmittedAt(),
                 request.getRejectionReason(),
+                request.getCancellationReason(),
                 toResponse(request.getExecution())
         );
     }

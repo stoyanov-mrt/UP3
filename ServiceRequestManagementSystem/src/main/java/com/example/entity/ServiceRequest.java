@@ -64,6 +64,8 @@ public class ServiceRequest {
 
     private String rejectionReason;
 
+    private String cancellationReason;
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "offer_id", unique = true)
     private Offer offer;
@@ -167,6 +169,30 @@ public class ServiceRequest {
         }
         execution.complete(result, now);
         status = RequestStatus.COMPLETED;
+    }
+
+    /**
+     * Allowed before the execution starts. A scheduled service has a deadline before its expected start:
+     * 24 hours for ON_SITE, 4 hours for REMOTE.
+     */
+    public void cancel(String reason, LocalDateTime now) {
+        if (reason == null || reason.isBlank()) {
+            throw new IllegalArgumentException("Cancellation reason is required");
+        }
+        switch (status) {
+            case SUBMITTED, PROCESSING, OFFERED, ACCEPTED -> {
+            }
+            case SCHEDULED -> {
+                LocalDateTime deadline = execution.getExpectedStart().minusHours(
+                        executionMode == ExecutionMode.ON_SITE ? 24 : 4);
+                if (now.isAfter(deadline)) {
+                    throw new CancellationDeadlinePassedException(executionMode, deadline);
+                }
+            }
+            default -> throw new InvalidStatusTransitionException("cancel", status);
+        }
+        status = RequestStatus.CANCELLED;
+        cancellationReason = reason;
     }
 
     // REMOTE: at least 4 hours after scheduling; ON_SITE: at the earliest on the next working day

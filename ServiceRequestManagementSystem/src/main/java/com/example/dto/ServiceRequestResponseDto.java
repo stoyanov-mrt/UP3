@@ -20,6 +20,7 @@ public record ServiceRequestResponseDto(
         RequestStatus status,
         LocalDateTime submittedAt,
         String rejectionReason,
+        String cancellationReason,
         ExecutionDto execution
 ) {
 

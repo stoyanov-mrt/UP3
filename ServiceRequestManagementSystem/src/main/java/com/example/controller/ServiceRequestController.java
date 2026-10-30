@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.dto.CancelServiceRequestDto;
 import com.example.dto.CompleteExecutionDto;
 import com.example.dto.CreateOfferDto;
 import com.example.dto.CreateServiceRequestDto;
@@ -84,5 +85,10 @@ public class ServiceRequestController {
     public ServiceRequestResponseDto completeExecution(@PathVariable Long id,
                                                        @Valid @RequestBody CompleteExecutionDto dto) {
         return service.completeExecution(id, dto.result());
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ServiceRequestResponseDto cancel(@PathVariable Long id, @Valid @RequestBody CancelServiceRequestDto dto) {
+        return service.cancel(id, dto.reason());
     }
 }

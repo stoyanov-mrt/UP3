@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.entity.CancellationDeadlinePassedException;
 import com.example.entity.InvalidScheduleException;
 import com.example.entity.InvalidStatusTransitionException;
 import com.example.entity.OfferAlreadyExistsException;
@@ -35,7 +36,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({InvalidStatusTransitionException.class, OfferAlreadyExistsException.class,
-            OfferExpiredException.class})
+            OfferExpiredException.class, CancellationDeadlinePassedException.class})
     public ProblemDetail handleConflict(RuntimeException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
