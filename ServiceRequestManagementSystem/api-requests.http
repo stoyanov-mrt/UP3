@@ -75,3 +75,22 @@ Content-Type: application/json
   "executionMode": "REMOTE",
   "priority": "STANDARD"
 }
+
+### Започване на обработка (SUBMITTED -> PROCESSING; повторно -> 409)
+POST http://localhost:8080/api/requests/1/start-processing
+
+### Отхвърляне (PROCESSING -> REJECTED; друг статус -> 409)
+POST http://localhost:8080/api/requests/1/reject
+Content-Type: application/json
+
+{
+  "reason": "Outside of our service area"
+}
+
+### Отхвърляне с празна причина -> 400
+POST http://localhost:8080/api/requests/1/reject
+Content-Type: application/json
+
+{
+  "reason": ""
+}

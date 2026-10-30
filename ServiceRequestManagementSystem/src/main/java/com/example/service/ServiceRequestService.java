@@ -3,15 +3,12 @@ package com.example.service;
 import com.example.dto.CreateServiceRequestDto;
 import com.example.dto.ServiceRequestResponseDto;
 import com.example.entity.CustomerInfo;
-import com.example.entity.RequestStatus;
 import com.example.entity.ServiceRequest;
 import com.example.repository.ServiceRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -22,18 +19,14 @@ public class ServiceRequestService {
 
     @Transactional
     public ServiceRequestResponseDto create(CreateServiceRequestDto dto) {
-        ServiceRequest request = new ServiceRequest();
-        request.setCustomerInfo(new CustomerInfo(dto.customerName(), dto.customerEmail()));
-        request.setDescription(dto.description());
-        request.setServiceType(dto.serviceType());
-        request.setExecutionMode(dto.executionMode());
-        request.setPriority(dto.priority());
-        request.setAddress(dto.address());
-        request.setUrgencyReason(dto.urgencyReason());
-        // System-managed values
-        request.setStatus(RequestStatus.SUBMITTED);
-        // Truncated to the precision stored by the database, so POST and GET return the same value
-        request.setSubmittedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+        ServiceRequest request = new ServiceRequest(
+                new CustomerInfo(dto.customerName(), dto.customerEmail()),
+                dto.description(),
+                dto.serviceType(),
+                dto.executionMode(),
+                dto.priority(),
+                dto.address(),
+                dto.urgencyReason());
         return toResponse(repository.save(request));
     }
 

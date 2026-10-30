@@ -9,17 +9,21 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
+/**
+ * State is changed only through the constructor and the lifecycle operations - there are no setters,
+ * so status, submittedAt and rejectionReason cannot bypass the lifecycle rules.
+ */
 @Entity
 @Table(name = "service_requests")
 @Getter
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // required by JPA
 public class ServiceRequest {
 
     @Id
@@ -56,6 +60,23 @@ public class ServiceRequest {
     private LocalDateTime submittedAt;
 
     private String rejectionReason;
+
+    /**
+     * Creates a newly submitted request. status and submittedAt are system-managed.
+     */
+    public ServiceRequest(CustomerInfo customerInfo, String description, ServiceType serviceType,
+                          ExecutionMode executionMode, Priority priority, String address, String urgencyReason) {
+        this.customerInfo = customerInfo;
+        this.description = description;
+        this.serviceType = serviceType;
+        this.executionMode = executionMode;
+        this.priority = priority;
+        this.address = address;
+        this.urgencyReason = urgencyReason;
+        this.status = RequestStatus.SUBMITTED;
+        // Truncated to the precision stored by the database, so POST and GET return the same value
+        this.submittedAt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
+    }
 
     public void startProcessing() {
         if (status != RequestStatus.SUBMITTED) {
