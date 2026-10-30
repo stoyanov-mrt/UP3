@@ -19,6 +19,16 @@ public record ServiceRequestResponseDto(
         String urgencyReason,
         RequestStatus status,
         LocalDateTime submittedAt,
-        String rejectionReason
+        String rejectionReason,
+        ExecutionDto execution
 ) {
+
+    /**
+     * null until the request is scheduled.
+     */
+    public record ExecutionDto(
+            LocalDateTime expectedStart,
+            LocalDateTime expectedEnd
+    ) {
+    }
 }

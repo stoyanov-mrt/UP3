@@ -4,6 +4,7 @@ import com.example.dto.CreateOfferDto;
 import com.example.dto.CreateServiceRequestDto;
 import com.example.dto.OfferResponseDto;
 import com.example.dto.RejectServiceRequestDto;
+import com.example.dto.ScheduleServiceRequestDto;
 import com.example.dto.ServiceRequestResponseDto;
 import com.example.service.ServiceRequestService;
 import jakarta.validation.Valid;
@@ -66,5 +67,10 @@ public class ServiceRequestController {
     @PostMapping("/{id}/offer/decline")
     public ServiceRequestResponseDto declineOffer(@PathVariable Long id) {
         return service.declineOffer(id);
+    }
+
+    @PostMapping("/{id}/schedule")
+    public ServiceRequestResponseDto schedule(@PathVariable Long id, @Valid @RequestBody ScheduleServiceRequestDto dto) {
+        return service.schedule(id, dto.expectedStart(), dto.expectedEnd());
     }
 }

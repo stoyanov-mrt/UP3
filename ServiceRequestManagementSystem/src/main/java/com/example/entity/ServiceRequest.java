@@ -68,6 +68,10 @@ public class ServiceRequest {
     @JoinColumn(name = "offer_id", unique = true)
     private Offer offer;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "execution_id", unique = true)
+    private ServiceExecution execution;
+
     /**
      * Creates a newly submitted request. status and submittedAt are system-managed;
      * submittedAt is the current time supplied by the service.
@@ -128,6 +132,30 @@ public class ServiceRequest {
     public void declineOffer(LocalDateTime now) {
         requireValidOffer("decline the offer of", now);
         status = RequestStatus.REJECTED;
+    }
+
+    public void schedule(LocalDateTime expectedStart, LocalDateTime expectedEnd, LocalDateTime now) {
+        if (status != RequestStatus.ACCEPTED) {
+            throw new InvalidStatusTransitionException("schedule", status);
+        }
+        if (!expectedEnd.isAfter(expectedStart)) {
+            throw new InvalidScheduleException("expectedEnd must be after expectedStart");
+        }
+        LocalDateTime earliestStart = earliestStart(now);
+        if (expectedStart.isBefore(earliestStart)) {
+            throw new InvalidScheduleException(
+                    executionMode + " service can start at the earliest at " + earliestStart);
+        }
+        execution = new ServiceExecution(expectedStart, expectedEnd);
+        status = RequestStatus.SCHEDULED;
+    }
+
+    // REMOTE: at least 4 hours after scheduling; ON_SITE: at the earliest on the next working day
+    private LocalDateTime earliestStart(LocalDateTime now) {
+        return switch (executionMode) {
+            case REMOTE -> now.plusHours(4);
+            case ON_SITE -> WorkingDays.nextWorkingDay(now.toLocalDate()).atStartOfDay();
+        };
     }
 
     /**

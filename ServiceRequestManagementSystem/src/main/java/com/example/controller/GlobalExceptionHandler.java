@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.entity.InvalidScheduleException;
 import com.example.entity.InvalidStatusTransitionException;
 import com.example.entity.OfferAlreadyExistsException;
 import com.example.entity.OfferExpiredException;
@@ -37,6 +38,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             OfferExpiredException.class})
     public ProblemDetail handleConflict(RuntimeException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidScheduleException.class)
+    public ProblemDetail handleInvalidSchedule(InvalidScheduleException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @Override

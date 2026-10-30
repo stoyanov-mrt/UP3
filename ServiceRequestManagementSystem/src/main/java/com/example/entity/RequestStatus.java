@@ -5,6 +5,7 @@ public enum RequestStatus {
     PROCESSING,
     OFFERED,
     ACCEPTED,
+    SCHEDULED,
     REJECTED,
     EXPIRED
 }

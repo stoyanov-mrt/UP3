@@ -7,6 +7,7 @@ import com.example.entity.CustomerInfo;
 import com.example.entity.Offer;
 import com.example.entity.OfferExpiredException;
 import com.example.entity.PriceBreakdown;
+import com.example.entity.ServiceExecution;
 import com.example.entity.ServiceRequest;
 import com.example.repository.ServiceRequestRepository;
 import lombok.RequiredArgsConstructor;
@@ -92,6 +93,13 @@ public class ServiceRequestService {
         return toResponse(request);
     }
 
+    @Transactional
+    public ServiceRequestResponseDto schedule(Long id, LocalDateTime expectedStart, LocalDateTime expectedEnd) {
+        ServiceRequest request = getRequest(id);
+        request.schedule(expectedStart, expectedEnd, now());
+        return toResponse(request);
+    }
+
     // Truncated to the precision stored by the database, so POST and GET return the same value
     private LocalDateTime now() {
         return LocalDateTime.now(clock).truncatedTo(ChronoUnit.MICROS);
@@ -115,7 +123,18 @@ public class ServiceRequestService {
                 request.getUrgencyReason(),
                 request.getStatus(),
                 request.getSubmittedAt(),
-                request.getRejectionReason()
+                request.getRejectionReason(),
+                toResponse(request.getExecution())
+        );
+    }
+
+    private ServiceRequestResponseDto.ExecutionDto toResponse(ServiceExecution execution) {
+        if (execution == null) {
+            return null;
+        }
+        return new ServiceRequestResponseDto.ExecutionDto(
+                execution.getExpectedStart(),
+                execution.getExpectedEnd()
         );
     }
 
