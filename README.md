@@ -30,6 +30,9 @@ cd ServiceRequestManagementSystem
 * [Лаб 4](docs/lab4.md) — жизнен цикъл: започване на обработка, отхвърляне, HTTP 409
 * [Лаб 5](docs/lab5.md) — оферта към заявката с изчисляване на цена
 * [Лаб 6](docs/lab6.md) — приемане/отказ/изтичане, планиране, изпълнение, отмяна, loyalty отстъпка; review и gap analysis
+* [Лаб 7](docs/lab7.md) — unit тестове (`WorkingDays`, `ServiceRequestService` с mock repository)
+
+Тестове: `./mvnw test` (в `ServiceRequestManagementSystem/`).
 
 ## API (след лаб 6)
 
