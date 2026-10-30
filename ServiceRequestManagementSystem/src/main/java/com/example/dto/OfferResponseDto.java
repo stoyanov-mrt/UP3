@@ -19,7 +19,8 @@ public record OfferResponseDto(
     public record PriceBreakdownDto(
             BigDecimal basePrice,
             BigDecimal executionModeAdditionalPrice,
-            BigDecimal prioritySurcharge
+            BigDecimal prioritySurcharge,
+            BigDecimal loyaltyDiscount
     ) {
     }
 }

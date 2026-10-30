@@ -114,14 +114,14 @@ public class ServiceRequest {
      * Creates the offer with a price calculated from the request's characteristics.
      * The status becomes OFFERED only after the offer has been created successfully.
      */
-    public Offer createOffer(String description, LocalDateTime now) {
+    public Offer createOffer(String description, boolean loyalCustomer, LocalDateTime now) {
         if (offer != null) {
             throw new OfferAlreadyExistsException();
         }
         if (status != RequestStatus.PROCESSING) {
             throw new InvalidStatusTransitionException("create an offer for", status);
         }
-        offer = new Offer(description, PriceBreakdown.of(serviceType, executionMode, priority), now);
+        offer = new Offer(description, PriceBreakdown.of(serviceType, executionMode, priority, loyalCustomer), now);
         status = RequestStatus.OFFERED;
         return offer;
     }

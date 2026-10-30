@@ -7,6 +7,7 @@ import com.example.entity.CustomerInfo;
 import com.example.entity.Offer;
 import com.example.entity.OfferExpiredException;
 import com.example.entity.PriceBreakdown;
+import com.example.entity.RequestStatus;
 import com.example.entity.ServiceExecution;
 import com.example.entity.ServiceRequest;
 import com.example.repository.ServiceRequestRepository;
@@ -22,6 +23,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ServiceRequestService {
+
+    static final int LOYALTY_MIN_COMPLETED_REQUESTS = 3;
 
     private final ServiceRequestRepository repository;
     private final Clock clock;
@@ -70,7 +73,7 @@ public class ServiceRequestService {
     @Transactional
     public OfferResponseDto createOffer(Long id, String description) {
         ServiceRequest request = getRequest(id);
-        Offer offer = request.createOffer(description, now());
+        Offer offer = request.createOffer(description, isLoyalCustomer(request), now());
         // The request is already managed: flush cascades PERSIST to this same offer instance, so its
         // generated id is available for the response. save() would merge and persist a copy instead.
         repository.flush();
@@ -119,6 +122,13 @@ public class ServiceRequestService {
         ServiceRequest request = getRequest(id);
         request.cancel(reason, now());
         return toResponse(request);
+    }
+
+    // A customer is identified by email (case-insensitive) - CustomerInfo has no identity of its own
+    private boolean isLoyalCustomer(ServiceRequest request) {
+        long completed = repository.countByCustomerInfoCustomerEmailIgnoreCaseAndStatus(
+                request.getCustomerInfo().customerEmail(), RequestStatus.COMPLETED);
+        return completed >= LOYALTY_MIN_COMPLETED_REQUESTS;
     }
 
     // Truncated to the precision stored by the database, so POST and GET return the same value
@@ -176,7 +186,8 @@ public class ServiceRequestService {
                 new OfferResponseDto.PriceBreakdownDto(
                         price.basePrice(),
                         price.executionModeAdditionalPrice(),
-                        price.prioritySurcharge())
+                        price.prioritySurcharge(),
+                        price.loyaltyDiscount())
         );
     }
 }

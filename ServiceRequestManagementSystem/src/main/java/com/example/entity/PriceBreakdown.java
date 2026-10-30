@@ -4,9 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
- * Immutable value object with the components of an offer's price. The final price is their sum.
+ * Immutable value object with the components of an offer's price in EUR.
+ * Final price = (base price + execution mode additional price + priority surcharge) - loyalty discount;
+ * the loyalty discount is calculated from the sum after all surcharges.
  */
 @Embeddable
 public record PriceBreakdown(
@@ -17,17 +20,26 @@ public record PriceBreakdown(
         BigDecimal executionModeAdditionalPrice,
 
         @Column(nullable = false, precision = 10, scale = 2)
-        BigDecimal prioritySurcharge
+        BigDecimal prioritySurcharge,
+
+        @Column(nullable = false, precision = 10, scale = 2)
+        BigDecimal loyaltyDiscount
 ) {
 
-    public static PriceBreakdown of(ServiceType serviceType, ExecutionMode executionMode, Priority priority) {
-        return new PriceBreakdown(
-                serviceType.getBasePrice(),
-                executionMode.getAdditionalPrice(),
-                priority.getSurcharge());
+    static final BigDecimal LOYALTY_DISCOUNT_RATE = new BigDecimal("0.10");
+
+    public static PriceBreakdown of(ServiceType serviceType, ExecutionMode executionMode, Priority priority,
+                                    boolean loyalCustomer) {
+        BigDecimal base = serviceType.getBasePrice();
+        BigDecimal additional = executionMode.getAdditionalPrice();
+        BigDecimal surcharge = priority.getSurcharge();
+        BigDecimal discount = loyalCustomer
+                ? base.add(additional).add(surcharge).multiply(LOYALTY_DISCOUNT_RATE).setScale(2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+        return new PriceBreakdown(base, additional, surcharge, discount);
     }
 
     public BigDecimal total() {
-        return basePrice.add(executionModeAdditionalPrice).add(prioritySurcharge);
+        return basePrice.add(executionModeAdditionalPrice).add(prioritySurcharge).subtract(loyaltyDiscount);
     }
 }
