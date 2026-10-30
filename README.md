@@ -26,3 +26,4 @@ cd ServiceRequestManagementSystem
 
 * [Лаб 1](docs/lab1.md) — начално приложение (POST/GET заявки)
 * [Лаб 2](docs/lab2.md) — домейн анализ, value object `CustomerInfo`
+* [Лаб 3](docs/lab3.md) — валидация (вкл. условни правила) и обработка на грешки
