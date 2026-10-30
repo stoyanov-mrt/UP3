@@ -1,0 +1,22 @@
+### Сценарии за ръчна проверка на API (IntelliJ HTTP Client; същите заявки могат да се пуснат и през Postman)
+
+### Създаване на заявка
+POST http://localhost:8080/api/requests
+Content-Type: application/json
+
+{
+  "customerEmail": "ivan@example.com",
+  "description": "Broken boiler",
+  "serviceType": "REPAIR",
+  "executionMode": "ON_SITE",
+  "priority": "URGENT"
+}
+
+### Всички заявки
+GET http://localhost:8080/api/requests
+
+### Заявка по id
+GET http://localhost:8080/api/requests/1
+
+### Несъществуваща заявка -> 404
+GET http://localhost:8080/api/requests/999
