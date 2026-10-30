@@ -179,6 +179,10 @@ public class ServiceRequest {
         if (reason == null || reason.isBlank()) {
             throw new IllegalArgumentException("Cancellation reason is required");
         }
+        // A request with an overdue offer is EXPIRED, not cancellable
+        if (expireOfferIfOverdue(now)) {
+            throw new OfferExpiredException(offer.getValidUntil());
+        }
         switch (status) {
             case SUBMITTED, PROCESSING, OFFERED, ACCEPTED -> {
             }
@@ -210,9 +214,21 @@ public class ServiceRequest {
         if (status != RequestStatus.OFFERED) {
             throw new InvalidStatusTransitionException(operation, status);
         }
-        if (offer.isExpiredAt(now)) {
-            status = RequestStatus.EXPIRED;
+        if (expireOfferIfOverdue(now)) {
             throw new OfferExpiredException(offer.getValidUntil());
         }
+    }
+
+    /**
+     * Moves an OFFERED request whose offer is past validUntil to EXPIRED.
+     *
+     * @return true if the request has just expired
+     */
+    public boolean expireOfferIfOverdue(LocalDateTime now) {
+        if (status == RequestStatus.OFFERED && offer.isExpiredAt(now)) {
+            status = RequestStatus.EXPIRED;
+            return true;
+        }
+        return false;
     }
 }

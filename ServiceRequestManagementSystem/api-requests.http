@@ -102,3 +102,37 @@ Content-Type: application/json
 {
   "description": "Replace the heating element and test the boiler"
 }
+
+### Приемане на офертата (OFFERED -> ACCEPTED; след validUntil -> 409 и EXPIRED)
+POST http://localhost:8080/api/requests/1/offer/accept
+
+### Отказ от офертата (OFFERED -> REJECTED)
+POST http://localhost:8080/api/requests/1/offer/decline
+
+### Планиране (ACCEPTED -> SCHEDULED); REMOTE >= +4ч, ON_SITE >= следващия работен ден
+POST http://localhost:8080/api/requests/1/schedule
+Content-Type: application/json
+
+{
+  "expectedStart": "2026-11-02T09:00:00",
+  "expectedEnd": "2026-11-02T12:00:00"
+}
+
+### Започване на изпълнението (SCHEDULED -> IN_PROGRESS)
+POST http://localhost:8080/api/requests/1/execution/start
+
+### Приключване (IN_PROGRESS -> COMPLETED)
+POST http://localhost:8080/api/requests/1/execution/complete
+Content-Type: application/json
+
+{
+  "result": "Installed and tested"
+}
+
+### Отмяна (преди изпълнение; ON_SITE >= 24ч, REMOTE >= 4ч преди планираното начало)
+POST http://localhost:8080/api/requests/1/cancel
+Content-Type: application/json
+
+{
+  "reason": "Customer changed plans"
+}

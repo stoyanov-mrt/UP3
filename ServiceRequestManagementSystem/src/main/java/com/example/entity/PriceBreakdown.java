@@ -30,13 +30,18 @@ public record PriceBreakdown(
 
     public static PriceBreakdown of(ServiceType serviceType, ExecutionMode executionMode, Priority priority,
                                     boolean loyalCustomer) {
-        BigDecimal base = serviceType.getBasePrice();
-        BigDecimal additional = executionMode.getAdditionalPrice();
-        BigDecimal surcharge = priority.getSurcharge();
+        BigDecimal base = money(serviceType.getBasePrice());
+        BigDecimal additional = money(executionMode.getAdditionalPrice());
+        BigDecimal surcharge = money(priority.getSurcharge());
         BigDecimal discount = loyalCustomer
-                ? base.add(additional).add(surcharge).multiply(LOYALTY_DISCOUNT_RATE).setScale(2, RoundingMode.HALF_UP)
-                : BigDecimal.ZERO;
+                ? money(base.add(additional).add(surcharge).multiply(LOYALTY_DISCOUNT_RATE))
+                : money(BigDecimal.ZERO);
         return new PriceBreakdown(base, additional, surcharge, discount);
+    }
+
+    // Every amount has 2 decimals, as stored in the database, so a new and a loaded offer look the same
+    private static BigDecimal money(BigDecimal amount) {
+        return amount.setScale(2, RoundingMode.HALF_UP);
     }
 
     public BigDecimal total() {

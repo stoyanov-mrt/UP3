@@ -117,11 +117,24 @@ public class ServiceRequestService {
         return toResponse(request);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = OfferExpiredException.class)
     public ServiceRequestResponseDto cancel(Long id, String reason) {
         ServiceRequest request = getRequest(id);
         request.cancel(reason, now());
         return toResponse(request);
+    }
+
+    /**
+     * Moves every OFFERED request whose offer is past validUntil to EXPIRED.
+     *
+     * @return the number of expired requests
+     */
+    @Transactional
+    public int expireOverdueOffers() {
+        LocalDateTime now = now();
+        List<ServiceRequest> overdue = repository.findByStatusAndOfferValidUntilBefore(RequestStatus.OFFERED, now);
+        overdue.forEach(request -> request.expireOfferIfOverdue(now));
+        return overdue.size();
     }
 
     // A customer is identified by email (case-insensitive) - CustomerInfo has no identity of its own
